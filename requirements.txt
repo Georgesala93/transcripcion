@@ -1,0 +1,6 @@
+moviepy==2.2.1
+openai-whisper==20250625
+numpy>=1.25.0
+torch>=2.0.0
+requests>=2.26.0
+tiktoken>=0.12.0
