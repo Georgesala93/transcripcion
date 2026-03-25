@@ -102,27 +102,30 @@ class AudioTranscriber:
             raise FileNotFoundError(f"El archivo {video_path} no existe")
 
         audio_path = FileManager.get_extracted_audio_path(video_path)
+        audio_path.parent.mkdir(parents=True, exist_ok=True)
         
         print(f"\n--- 🎞️  Extrayendo audio del video ---")
         print(f"Video: {video_path.name}")
         print(f"Tamaño: {FileManager.get_file_size_mb(video_path):.2f} MB")
         
         try:
-            video = mp.VideoFileClip(str(video_path))
-            if video.audio is None:
-                raise RuntimeError("El video no contiene audio")
-            
-            video.audio.write_audiofile(
-                str(audio_path),
-                # MoviePy 2.x ya no acepta el parámetro `verbose`; en su lugar
-                # podemos controlar el `logger` o `write_logfile`.
-                write_logfile=False,
-                logger=None
-            )
-            video.close()
+            import subprocess
+            # Usar ffmpeg directamente para extraer audio
+            cmd = [
+                "ffmpeg",
+                "-i", str(video_path),
+                "-vn",  # No video
+                "-acodec", "mp3",
+                "-ab", "128k",
+                "-y",  # Overwrite
+                str(audio_path)
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
             print(f"✅ Audio guardado: {audio_path.name}")
             return audio_path
             
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"❌ Error al extraer audio: {e.stderr}")
         except Exception as e:
             raise RuntimeError(f"❌ Error al extraer audio: {e}")
 

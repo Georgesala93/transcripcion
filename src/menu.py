@@ -38,22 +38,28 @@ class Menu:
         print(MENU_OPTION_FORMAT.format(num=1, text="Transcribir VIDEO"))
         print(MENU_OPTION_FORMAT.format(num=2, text="Transcribir AUDIO MP3"))
         print(MENU_OPTION_FORMAT.format(num=3, text="Ver archivos de TEXTO"))
+        print(MENU_OPTION_FORMAT.format(num=4, text="Crear nueva carpeta de tema"))
         print(MENU_OPTION_FORMAT.format(num=0, text="Salir"))
         print()
 
-    def display_video_menu(self) -> None:
+    def display_video_menu(self, selected_folder: Optional[Path] = None) -> None:
         """Muestra menú de selección de videos."""
         self.print_header("SELECCIONAR VIDEO")
         
-        videos = FileManager.get_video_files()
+        if selected_folder:
+            videos = [f for f in FileManager.get_video_files() if f.parent == selected_folder]
+            folder_name = selected_folder.name
+        else:
+            videos = FileManager.get_video_files()
+            folder_name = "todas las carpetas"
         
         if not videos:
-            print("⚠️  No hay videos disponibles en la carpeta 'video/'")
+            print(f"⚠️  No hay videos disponibles en {folder_name}")
             input("\nPresione Enter para continuar...")
             return None
         
         items = FileManager.list_items_with_status(videos, "video")
-        print(f"\nEncontrados {len(videos)} video(s):\n")
+        print(f"\nEncontrados {len(videos)} video(s) en {folder_name}:\n")
         
         for num, display_name, _ in items:
             print(MENU_OPTION_FORMAT.format(num=num, text=display_name))
@@ -63,19 +69,24 @@ class Menu:
         
         return videos, items
 
-    def display_audio_menu(self) -> None:
+    def display_audio_menu(self, selected_folder: Optional[Path] = None) -> None:
         """Muestra menú de selección de audios."""
         self.print_header("SELECCIONAR AUDIO MP3")
         
-        audios = FileManager.get_audio_files()
+        if selected_folder:
+            audios = [f for f in FileManager.get_audio_files() if f.parent == selected_folder]
+            folder_name = selected_folder.name
+        else:
+            audios = FileManager.get_audio_files()
+            folder_name = "todas las carpetas"
         
         if not audios:
-            print("⚠️  No hay archivos MP3 disponibles en la carpeta 'mp3/'")
+            print(f"⚠️  No hay archivos MP3 disponibles en {folder_name}")
             input("\nPresione Enter para continuar...")
             return None
         
         items = FileManager.list_items_with_status(audios, "audio")
-        print(f"\nEncontrados {len(audios)} archivo(s) de audio:\n")
+        print(f"\nEncontrados {len(audios)} archivo(s) de audio en {folder_name}:\n")
         
         for num, display_name, _ in items:
             print(MENU_OPTION_FORMAT.format(num=num, text=display_name))
@@ -89,14 +100,36 @@ class Menu:
         """Muestra los archivos de texto generados."""
         self.print_header("ARCHIVOS DE TRANSCRIPCIÓN")
         
-        from src.config import TEXT_DIR
-        transcriptions = sorted(TEXT_DIR.glob(f"*_transcripcion.txt"))
+        folders = FileManager.get_text_folders()
         
-        if not transcriptions:
-            print("\n⚠️  No hay transcripciones generadas aún.\n")
+        if not folders:
+            print("\n⚠️  No hay carpetas de tema en text/.")
             input("Presione Enter para continuar...")
             return
         
+        print("\nCarpetas disponibles:\n")
+        
+        for idx, folder in enumerate(folders, 1):
+            transcription_files = list(folder.glob("*_transcripcion.txt"))
+            print(MENU_OPTION_FORMAT.format(num=idx, text=f"{folder.name} ({len(transcription_files)} transcripción(es))"))
+        
+        print(MENU_OPTION_FORMAT.format(num=0, text="Volver al menú principal"))
+        print()
+        
+        choice = self._get_valid_input(0, len(folders))
+        
+        if choice == 0:
+            return
+        
+        selected_folder = folders[choice - 1]
+        transcriptions = sorted(selected_folder.glob("*_transcripcion.txt"))
+        
+        if not transcriptions:
+            print(f"\n⚠️  No hay transcripciones en la carpeta '{selected_folder.name}'.\n")
+            input("Presione Enter para continuar...")
+            return
+        
+        self.print_header(f"TRANSCRIPCIONES - {selected_folder.name}")
         print(f"\nEncontradas {len(transcriptions)} transcripción(es):\n")
         
         for idx, trans_file in enumerate(transcriptions, 1):
@@ -147,7 +180,34 @@ class Menu:
 
     def process_video_option(self) -> None:
         """Procesa la opción de transcribir video."""
-        result = self.display_video_menu()
+        # Mostrar carpetas disponibles
+        folders = FileManager.get_video_folders()
+        
+        if not folders:
+            print("⚠️  No hay carpetas de tema en video/. Use la opción 4 para crear una.")
+            input("\nPresione Enter para continuar...")
+            return
+        
+        self.print_header("SELECCIONAR CARPETA DE VIDEO")
+        print("\nCarpetas disponibles:\n")
+        
+        for idx, folder in enumerate(folders, 1):
+            video_count = len([f for f in FileManager.get_video_files() if f.parent == folder])
+            print(MENU_OPTION_FORMAT.format(num=idx, text=f"{folder.name} ({video_count} video(s))"))
+        
+        print(MENU_OPTION_FORMAT.format(num=0, text="Volver al menú principal"))
+        print()
+        
+        choice = self._get_valid_input(0, len(folders))
+        
+        if choice == 0:
+            return
+        
+        selected_folder = folders[choice - 1]
+        
+        # Mostrar videos en la carpeta seleccionada
+        result = self.display_video_menu(selected_folder)
+        
         if result is None:
             return
         
@@ -173,7 +233,34 @@ class Menu:
 
     def process_audio_option(self) -> None:
         """Procesa la opción de transcribir audio."""
-        result = self.display_audio_menu()
+        # Mostrar carpetas disponibles
+        folders = FileManager.get_audio_folders()
+        
+        if not folders:
+            print("⚠️  No hay carpetas de tema en mp3/. Use la opción 4 para crear una.")
+            input("\nPresione Enter para continuar...")
+            return
+        
+        self.print_header("SELECCIONAR CARPETA DE AUDIO")
+        print("\nCarpetas disponibles:\n")
+        
+        for idx, folder in enumerate(folders, 1):
+            audio_count = len([f for f in FileManager.get_audio_files() if f.parent == folder])
+            print(MENU_OPTION_FORMAT.format(num=idx, text=f"{folder.name} ({audio_count} audio(s))"))
+        
+        print(MENU_OPTION_FORMAT.format(num=0, text="Volver al menú principal"))
+        print()
+        
+        choice = self._get_valid_input(0, len(folders))
+        
+        if choice == 0:
+            return
+        
+        selected_folder = folders[choice - 1]
+        
+        # Mostrar audios en la carpeta seleccionada
+        result = self.display_audio_menu(selected_folder)
+        
         if result is None:
             return
         
@@ -197,11 +284,37 @@ class Menu:
         self.transcriber.transcribe_audio_file(selected_audio)
         input("\nPresione Enter para continuar...")
 
+    def process_create_folder_option(self) -> None:
+        """Procesa la opción de crear nueva carpeta de tema."""
+        self.print_header("CREAR NUEVA CARPETA DE TEMA")
+        
+        theme_name = input("Ingrese el nombre del tema: ").strip()
+        
+        if not theme_name:
+            print("❌ El nombre del tema no puede estar vacío.")
+            input("\nPresione Enter para continuar...")
+            return
+        
+        # Validar caracteres inválidos para nombres de carpeta
+        invalid_chars = ['<', '>', ':', '"', '|', '?', '*']
+        if any(char in theme_name for char in invalid_chars):
+            print("❌ El nombre del tema contiene caracteres inválidos.")
+            input("\nPresione Enter para continuar...")
+            return
+        
+        try:
+            FileManager.create_theme_folders(theme_name)
+            print(f"✅ Carpetas creadas exitosamente para el tema '{theme_name}' en video/, text/ y mp3/.")
+        except Exception as e:
+            print(f"❌ Error al crear las carpetas: {e}")
+        
+        input("\nPresione Enter para continuar...")
+
     def run(self) -> None:
         """Ejecuta el menú principal."""
         while self.running:
             self.display_main_menu()
-            choice = self._get_valid_input(0, 3)
+            choice = self._get_valid_input(0, 4)
             
             if choice == 0:
                 print("\n👋 ¡Hasta luego!\n")
@@ -212,3 +325,5 @@ class Menu:
                 self.process_audio_option()
             elif choice == 3:
                 self.display_text_menu()
+            elif choice == 4:
+                self.process_create_folder_option()

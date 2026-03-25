@@ -18,18 +18,18 @@ class FileManager:
 
     @staticmethod
     def get_video_files() -> List[Path]:
-        """Obtiene lista de videos en la carpeta video/."""
+        """Obtiene lista de videos en la carpeta video/ y subcarpetas."""
         videos = []
         for ext in VIDEO_EXTENSIONS:
-            videos.extend(VIDEO_DIR.glob(f"*{ext}"))
+            videos.extend(VIDEO_DIR.glob(f"**/*{ext}"))
         return sorted(videos)
 
     @staticmethod
     def get_audio_files() -> List[Path]:
-        """Obtiene lista de archivos de audio en la carpeta mp3/."""
+        """Obtiene lista de archivos de audio en la carpeta mp3/ y subcarpetas."""
         audios = []
         for ext in AUDIO_EXTENSIONS:
-            audios.extend(AUDIO_DIR.glob(f"*{ext}"))
+            audios.extend(AUDIO_DIR.glob(f"**/*{ext}"))
         return sorted(audios)
 
     @staticmethod
@@ -44,7 +44,26 @@ class FileManager:
             Path: Ruta del archivo de transcripción
         """
         base_name = source_file.stem
-        return TEXT_DIR / f"{base_name}{TRANSCRIPTION_SUFFIX}{EXTENSION_TEXT}"
+        
+        # Determinar si es video o audio para obtener la carpeta relativa
+        try:
+            if source_file.parent == VIDEO_DIR or source_file.parent == AUDIO_DIR:
+                # Archivo en raíz
+                return TEXT_DIR / f"{base_name}{TRANSCRIPTION_SUFFIX}{EXTENSION_TEXT}"
+            else:
+                # Archivo en subcarpeta, obtener la carpeta relativa
+                if VIDEO_DIR in source_file.parents:
+                    relative_folder = source_file.parent.relative_to(VIDEO_DIR)
+                elif AUDIO_DIR in source_file.parents:
+                    relative_folder = source_file.parent.relative_to(AUDIO_DIR)
+                else:
+                    # Fallback, asumir raíz
+                    relative_folder = Path()
+                
+                return TEXT_DIR / relative_folder / f"{base_name}{TRANSCRIPTION_SUFFIX}{EXTENSION_TEXT}"
+        except ValueError:
+            # Archivo no en las carpetas esperadas, guardar en raíz
+            return TEXT_DIR / f"{base_name}{TRANSCRIPTION_SUFFIX}{EXTENSION_TEXT}"
 
     @staticmethod
     def has_transcription(source_file: Path) -> bool:
@@ -107,6 +126,7 @@ class FileManager:
             Path: Ruta del archivo guardado
         """
         output_path = FileManager.get_transcription_path(source_file)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(content, encoding="utf-8")
         return output_path
 
@@ -115,4 +135,43 @@ class FileManager:
         """Obtiene la ruta del audio extraído del video."""
         from src.config import AUDIO_SUFFIX
         base_name = video_file.stem
-        return AUDIO_DIR / f"{base_name}{AUDIO_SUFFIX}.mp3"
+        
+        # Determinar la carpeta relativa
+        try:
+            if video_file.parent == VIDEO_DIR:
+                # Archivo en raíz
+                return AUDIO_DIR / f"{base_name}{AUDIO_SUFFIX}.mp3"
+            else:
+                # Archivo en subcarpeta
+                relative_folder = video_file.parent.relative_to(VIDEO_DIR)
+                return AUDIO_DIR / relative_folder / f"{base_name}{AUDIO_SUFFIX}.mp3"
+        except ValueError:
+            # Video no está en VIDEO_DIR, guardar en raíz
+            return AUDIO_DIR / f"{base_name}{AUDIO_SUFFIX}.mp3"
+
+    @staticmethod
+    def create_theme_folders(theme_name: str) -> None:
+        """
+        Crea las carpetas para un tema en video/, text/ y mp3/.
+        
+        Args:
+            theme_name: Nombre del tema
+        """
+        (VIDEO_DIR / theme_name).mkdir(parents=True, exist_ok=True)
+        (TEXT_DIR / theme_name).mkdir(parents=True, exist_ok=True)
+        (AUDIO_DIR / theme_name).mkdir(parents=True, exist_ok=True)
+
+    @staticmethod
+    def get_video_folders() -> List[Path]:
+        """Obtiene lista de carpetas en video/."""
+        return [p for p in VIDEO_DIR.iterdir() if p.is_dir()]
+
+    @staticmethod
+    def get_audio_folders() -> List[Path]:
+        """Obtiene lista de carpetas en mp3/."""
+        return [p for p in AUDIO_DIR.iterdir() if p.is_dir()]
+
+    @staticmethod
+    def get_text_folders() -> List[Path]:
+        """Obtiene lista de carpetas en text/."""
+        return [p for p in TEXT_DIR.iterdir() if p.is_dir()]

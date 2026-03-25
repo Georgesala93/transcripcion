@@ -37,18 +37,13 @@ wheels/
 *.log
 logs/
 
-# Archivos binarios de audio y video
-mp3/*.mp3
-mp3/*.wav
-mp3/*.ogg
-video/*.mp4
-video/*.mkv
-video/*.avi
-video/*.mov
-video/*.webm
+# Archivos binarios de audio y video (incluye subcarpetas de temas)
+mp3/**
+video/**
 
-# Archivos generados
-text/*_transcripcion.txt
+# Archivos generados (texto de transcripciones por carpeta)
+text/**/ *_transcripcion.txt
+text/**/ *_extracted.mp3
 
 # Configuración local
 .env
