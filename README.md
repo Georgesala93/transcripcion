@@ -64,9 +64,10 @@ transcripcion/
 │   ├── menu.py            # Menú interactivo
 │   └── __init__.py
 │
-├── video/                  # 📁 Coloca aquí los videos
-├── mp3/                    # 🎵 Coloca aquí los audios
-├── text/                   # 📄 Transcripciones (auto-generadas)
+├── media/                  # 📂 Carpeta contenedora de contenido
+│   ├── video/             # 📁 Coloca aquí los videos
+│   ├── mp3/               # 🎵 Coloca aquí los audios
+│   └── text/              # 📄 Transcripciones (auto-generadas)
 │
 ├── main.py                 # ⭐ Ejecuta esto
 ├── requirements.txt        # Dependencias
@@ -97,7 +98,7 @@ Seleccione una opción:
 
 ### Opción 1: Transcribir VIDEO
 
-1. Muestra todos los videos en `video/`
+1. Muestra todos los videos en `media/video/`
 2. Indica el estado:
    ```
    [1] ⏳ [PENDIENTE] Clase I.mp4
@@ -107,17 +108,17 @@ Seleccione una opción:
 4. El sistema:
    - Extrae el audio del video
    - Transcribe con Whisper
-   - Guarda en `text/nombre_transcripcion.txt`
+   - Guarda en `media/text/nombre_transcripcion.txt`
 
 ### Opción 2: Transcribir AUDIO
 
-1. Muestra todos los audios en `mp3/`
+1. Muestra todos los audios en `media/mp3/`
 2. Selecciona uno
 3. Transcribe directamente (sin necesidad de extraer audio)
 
 ### Opción 3: Ver Transcripciones
 
-1. Lista todas las transcripciones en `text/`
+1. Lista todas las transcripciones en `media/text/`
 2. Muestra tamaño y número de líneas
 3. Permite leer el contenido completo
 
@@ -127,14 +128,14 @@ Seleccione una opción:
 
 ### Uso Básico
 ```bash
-# 1. Coloca videos en video/
+# 1. Coloca videos en media/video/
 # 2. Ejecuta la aplicación
 python main.py
 
 # 3. Selecciona opción 1
 # 4. Selecciona el video
 # 5. Espera (puede tomar 10-30 min en CPU)
-# 6. ¡Listo! Revisa text/
+# 6. ¡Listo! Revisa media/text/
 ```
 
 ### Uso Programático
@@ -144,7 +145,7 @@ from pathlib import Path
 
 # Transcribir un video
 transcriber = AudioTranscriber()
-video = Path("video/mi_video.mp4")
+video = Path("media/video/mi_video.mp4")
 texto = transcriber.transcribe_video(video)
 
 # Verificar si ya está transcrito
@@ -176,9 +177,10 @@ WHISPER_MODEL = "base"  # Cambia aquí
 WHISPER_LANGUAGE = "es"  # Español
 
 # Rutas (auto-configuradas)
-VIDEO_DIR = "video/"
-AUDIO_DIR = "mp3/"
-TEXT_DIR = "text/"
+MEDIA_DIR = BASE_DIR / "media"
+VIDEO_DIR = MEDIA_DIR / "video"
+AUDIO_DIR = MEDIA_DIR / "mp3"
+TEXT_DIR = MEDIA_DIR / "text"
 ```
 
 **Modelos disponibles:**
