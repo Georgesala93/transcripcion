@@ -41,6 +41,11 @@ logs/
 media/mp3/**
 media/video/**
 
+# Pero permitir .gitkeep para mantener carpetas vacías
+!media/mp3/.gitkeep
+!media/video/.gitkeep
+!media/text/.gitkeep
+
 # Archivos generados (texto de transcripciones por carpeta)
 media/text/**/ *_transcripcion.txt
 media/text/**/ *_extracted.mp3
