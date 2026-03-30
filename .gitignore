@@ -38,12 +38,12 @@ wheels/
 logs/
 
 # Archivos binarios de audio y video (incluye subcarpetas de temas)
-mp3/**
-video/**
+media/mp3/**
+media/video/**
 
 # Archivos generados (texto de transcripciones por carpeta)
-text/**/ *_transcripcion.txt
-text/**/ *_extracted.mp3
+media/text/**/ *_transcripcion.txt
+media/text/**/ *_extracted.mp3
 
 # Configuración local
 .env
