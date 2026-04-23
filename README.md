@@ -2,52 +2,295 @@
 
 Aplicación interactiva para transcribir videos y archivos de audio a texto usando OpenAI Whisper.
 
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 ---
 
 ## 📋 ¿Qué hace este proyecto?
 
 Convierte automáticamente videos o archivos de audio en texto mediante un **menú interactivo** que:
-- Selecciona archivos de forma visual
-- Muestra el estado de transcripción (✅ Transcrito / ⏳ Pendiente)
-- Guarda las transcripciones organizadas
-- Evita duplicados confirmando antes de retranscribir
+- ✅ Selecciona archivos de forma visual
+- 📊 Muestra el estado de transcripción (✅ Transcrito / ⏳ Pendiente)
+- 💾 Guarda las transcripciones organizadas por carpetas
+- 🔄 Evita duplicados confirmando antes de retranscribir
+- 🎯 Soporta múltiples formatos (MP4, MP3, WAV, etc.)
 
 ---
 
-## 🚀 Instalación Rápida
+## 🏗️ Arquitectura del Proyecto
+
+```
+transcripcion/
+├── 📁 src/                    # Módulos principales
+│   ├── __init__.py           # Inicialización del paquete
+│   ├── config.py             # Configuraciones del proyecto
+│   ├── file_manager.py       # Gestión de archivos y directorios
+│   ├── menu.py               # Interfaz de menú interactivo
+│   └── transcriber.py        # Lógica de transcripción con Whisper
+├── 📁 tests/                 # Tests unitarios
+│   ├── test_menu.py          # Tests del menú
+│   └── test_transcriber.py   # Tests del transcriptor
+├── 📁 scripts/               # Scripts de desarrollo y utilidades
+│   ├── setup_windows.py      # Instalador automático para Windows
+│   ├── test_structure.py     # Verificación de estructura del proyecto
+│   ├── validate.py           # Validación completa de módulos
+│   ├── inspect_moviepy.py    # Inspección de MoviePy
+│   └── test_audio.py         # Tests de procesamiento de audio
+├── 📁 media/                 # Archivos del usuario (no versionados)
+│   ├── mp3/                  # Archivos de audio para transcribir
+│   ├── video/                # Archivos de video para transcribir
+│   └── text/                 # Transcripciones generadas automáticamente
+├── 📄 main.py                # Punto de entrada principal
+├── 📄 example_usage.py       # Ejemplos de uso programático
+├── 📄 requirements.txt       # Dependencias del proyecto
+├── 📄 .gitignore            # Archivos ignorados por Git
+└── 📄 README.md             # Esta documentación
+```
+
+---
+
+## 🚀 Instalación y Configuración
 
 ### 1. Requisitos Previos
-- **Python 3.8+**
+- **Python 3.8 o superior**
 - **FFmpeg** (para procesar video/audio)
+- **Git** (para clonar el repositorio)
 
 ### 2. Instalar FFmpeg
 ```bash
-# Windows
+# Windows (PowerShell como Administrador)
 winget install ffmpeg
 
 # macOS
 brew install ffmpeg
 
-# Linux
-sudo apt-get install ffmpeg
+# Linux (Ubuntu/Debian)
+sudo apt-get update && sudo apt-get install ffmpeg
+
+# Verificar instalación
+ffmpeg -version
 ```
 
-### 3. Configurar el Proyecto
+### 3. Clonar y Configurar el Proyecto
 ```bash
+# Clonar repositorio
+git clone https://github.com/Georgesala93/transcripcion.git
+cd transcripcion
+
 # Crear entorno virtual
 python -m venv .venv
 
-# Activar entorno
-.venv\Scripts\activate  # Windows
-source .venv/bin/activate  # Linux/Mac
+# Activar entorno virtual
+# Windows:
+.venv\Scripts\activate
+# Linux/Mac:
+source .venv/bin/activate
 
 # Instalar dependencias
 pip install -r requirements.txt
 ```
 
-### 4. Ejecutar
+### 4. Verificar Instalación
+```bash
+# Ejecutar validación completa
+python scripts/validate.py
+
+# O verificar estructura del proyecto
+python scripts/test_structure.py
+```
+
+---
+
+## 🎯 Uso Básico
+
+### Modo Interactivo (Recomendado)
 ```bash
 python main.py
+```
+Esto abrirá un menú interactivo donde podrás:
+1. Ver archivos disponibles para transcribir
+2. Seleccionar archivos para procesar
+3. Ver el progreso de la transcripción
+4. Revisar transcripciones generadas
+
+### Uso Programático
+```python
+from src.file_manager import FileManager
+from src.transcriber import AudioTranscriber
+
+# Ver archivos disponibles
+videos = FileManager.get_video_files()
+audios = FileManager.get_audio_files()
+
+# Crear transcriptor
+transcriber = AudioTranscriber()
+
+# Transcribir un archivo
+transcription = transcriber.transcribe_audio("ruta/al/archivo.mp3")
+```
+
+Ver `example_usage.py` para más ejemplos detallados.
+
+---
+
+## 📁 Estructura de Archivos
+
+### Archivos de Entrada (Usuario)
+Coloca tus archivos en estas carpetas:
+- `media/mp3/` - Archivos de audio (.mp3, .wav, .ogg, .m4a)
+- `media/video/` - Archivos de video (.mp4, .mkv, .avi, .mov)
+
+### Archivos de Salida (Generados)
+Las transcripciones se guardan automáticamente en:
+- `media/text/` - Archivos de texto con las transcripciones
+
+### Ejemplo de Organización
+```
+media/
+├── mp3/
+│   ├── leccion1.mp3
+│   └── leccion2.wav
+├── video/
+│   ├── clase1.mp4
+│   └── clase2.mkv
+└── text/
+    ├── leccion1_transcripcion.txt
+    ├── leccion2_transcripcion.txt
+    ├── clase1_transcripcion.txt
+    └── clase2_transcripcion.txt
+```
+
+---
+
+## 🛠️ Scripts Disponibles
+
+### Instalación
+- `scripts/setup_windows.py` - Instalador automático para Windows
+
+### Validación y Tests
+- `scripts/validate.py` - Validación completa de todos los módulos
+- `scripts/test_structure.py` - Verificación de estructura del proyecto
+- `scripts/test_audio.py` - Tests específicos de procesamiento de audio
+
+### Utilidades
+- `scripts/inspect_moviepy.py` - Inspección y debugging de MoviePy
+
+### Ejecutar Scripts
+```bash
+# Desde la raíz del proyecto
+python scripts/validate.py
+python scripts/test_structure.py
+```
+
+---
+
+## 🧪 Ejecutar Tests
+
+```bash
+# Instalar pytest si no está incluido
+pip install pytest
+
+# Ejecutar todos los tests
+pytest tests/
+
+# Ejecutar tests específicos
+pytest tests/test_menu.py
+pytest tests/test_transcriber.py
+
+# Con cobertura
+pytest --cov=src tests/
+```
+
+---
+
+## 🔧 Desarrollo
+
+### Configuración para Desarrolladores
+```bash
+# Instalar dependencias de desarrollo
+pip install -r requirements-dev.txt  # Si existe
+
+# Ejecutar validación antes de commits
+python scripts/validate.py
+
+# Ver estructura del proyecto
+python scripts/test_structure.py
+```
+
+### Contribuir
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit tus cambios (`git commit -am 'Agrega nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Abre un Pull Request
+
+---
+
+## 📋 Dependencias
+
+### Principales
+- `openai-whisper` - Motor de transcripción con IA
+- `moviepy` - Procesamiento de video/audio
+- `torch` - Framework de machine learning
+- `numpy` - Computación numérica
+
+### De Desarrollo
+- `pytest` - Framework de testing
+- `pytest-cov` - Cobertura de tests
+
+Ver `requirements.txt` para versiones específicas.
+
+---
+
+## ❓ Solución de Problemas
+
+### Error: "ffmpeg no encontrado"
+```bash
+# Verificar instalación
+ffmpeg -version
+
+# Reinstalar si es necesario
+winget install ffmpeg  # Windows
+```
+
+### Error: "No module named 'whisper'"
+```bash
+# Asegurar que el entorno virtual esté activado
+.venv\Scripts\activate  # Windows
+
+# Reinstalar dependencias
+pip install -r requirements.txt
+```
+
+### Error: "CUDA out of memory"
+- El modelo de Whisper puede requerir mucha memoria GPU
+- Usa un modelo más pequeño: modifica `config.py`
+- O ejecuta en CPU: `torch.device('cpu')`
+
+---
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+
+---
+
+## 👥 Autor
+
+**Jorge Sala** - [Georgesala93](https://github.com/Georgesala93)
+
+---
+
+## 🙏 Agradecimientos
+
+- OpenAI por Whisper
+- Comunidad de Python por las librerías utilizadas
+- Contribuidores del proyecto
+
+---
+
+*Última actualización: Abril 2026*
 ```
 
 ---
