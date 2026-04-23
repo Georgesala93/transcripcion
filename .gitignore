@@ -48,8 +48,8 @@ media/video/**
 !media/text/.gitkeep
 
 # Archivos generados (texto de transcripciones por carpeta)
-media/text/**/ *_transcripcion.txt
-media/text/**/ *_extracted.mp3
+media/text/**/*.txt
+media/text/**/*.mp3
 
 # Configuración local
 .env
